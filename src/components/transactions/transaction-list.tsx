@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAccounts } from "@/hooks/use-accounts";
 import { useCategories } from "@/hooks/use-categories";
+import { useDebts } from "@/hooks/use-debts";
 import { formatCurrency, formatDate, toJsDate } from "@/lib/format";
 import { deleteTransaction } from "@/services/transactionService";
 import type { Transaction } from "@/types";
@@ -60,6 +61,7 @@ function TransactionIcon({ type }: { type: Transaction["type"] }) {
 export function TransactionList({ transactions }: { transactions: Transaction[] }) {
   const { accounts } = useAccounts(true);
   const { categories } = useCategories();
+  const { debts } = useDebts();
   const [editing, setEditing] = React.useState<Transaction | null>(null);
   const [deleting, setDeleting] = React.useState<Transaction | null>(null);
   const [isDeleting, setIsDeleting] = React.useState(false);
@@ -68,6 +70,8 @@ export function TransactionList({ transactions }: { transactions: Transaction[] 
     accounts.find((a) => a.id === id)?.name ?? "Cuenta eliminada";
   const categoryName = (id?: string) =>
     categories.find((c) => c.id === id)?.name ?? "Sin categoría";
+  const debtName = (id?: string) =>
+    debts.find((d) => d.id === id)?.name ?? "";
 
   async function handleDelete() {
     if (!deleting) return;
@@ -112,9 +116,11 @@ export function TransactionList({ transactions }: { transactions: Transaction[] 
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium leading-none">{tx.description}</p>
               <p className="text-muted-foreground mt-1 truncate text-xs">
-                {tx.type === "transfer"
-                  ? `${accountName(tx.fromAccountId)} → ${accountName(tx.toAccountId)}`
-                  : `${categoryName(tx.categoryId)} · ${accountName(tx.accountId)}`}
+                {tx.type === "transfer" ? (
+                  `${accountName(tx.fromAccountId)} → ${accountName(tx.toAccountId)}`
+                ) : (
+                  `${categoryName(tx.categoryId)}${tx.debtId ? ` · Deuda: ${debtName(tx.debtId)}` : ""} · ${accountName(tx.accountId)}`
+                )}
                 {" · "}
                 {formatDate(toJsDate(tx.date))}
               </p>

@@ -52,9 +52,37 @@ export async function createIncomeOrExpense(
       date: toTimestamp(input.date),
       accountId: input.accountId,
       categoryId: input.categoryId,
+      ...(input.debtId ? { debtId: input.debtId } : {}),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
+
+    if (type === "expense" && input.debtId) {
+      const debtRef = doc(db, "debts", input.debtId);
+      const debtSnap = await tx.get(debtRef);
+      if (debtSnap.exists()) {
+        const debtData = debtSnap.data();
+        const paidInstallments = (debtData.paidInstallments as number) + 1;
+        const remainingInstallments = Math.max(
+          (debtData.totalInstallments as number) - paidInstallments,
+          0
+        );
+        const paidAmount = (debtData.paidAmount as number) + input.amount;
+        const remainingAmount = Math.max(
+          (debtData.remainingAmount as number) - input.amount,
+          0
+        );
+
+        tx.update(debtRef, {
+          paidInstallments,
+          remainingInstallments,
+          paidAmount,
+          remainingAmount,
+          updatedAt: serverTimestamp(),
+          ...(remainingAmount === 0 ? { isActive: false } : {}),
+        });
+      }
+    }
 
     tx.update(accountRef, {
       currentBalance: currentBalance + delta,

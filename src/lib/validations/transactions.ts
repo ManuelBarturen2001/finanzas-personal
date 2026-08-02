@@ -15,6 +15,16 @@ export const incomeExpenseSchema = z.object({
   ...baseFields,
   accountId: z.string().min(1, "Selecciona una cuenta"),
   categoryId: z.string().min(1, "Selecciona una categoría"),
+  debtId: z
+    .string()
+    .optional()
+    .transform((value) => (value === "" ? undefined : value))
+    .refine(
+      (value) => value === undefined || value.length > 0,
+      {
+        message: "Selecciona una deuda"
+      }
+    ),
 });
 
 export type IncomeExpenseInput = z.infer<typeof incomeExpenseSchema>;

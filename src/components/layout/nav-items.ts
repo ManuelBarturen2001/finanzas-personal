@@ -31,7 +31,6 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Deudas",
     href: "/debts",
     icon: CircleDollarSign,
-    comingSoon: true,
   },
   {
     label: "Estadísticas",

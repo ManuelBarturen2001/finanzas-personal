@@ -41,6 +41,14 @@
         { "fieldPath": "isActive", "order": "ASCENDING" },
         { "fieldPath": "dueDay", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "debts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "dueDate", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

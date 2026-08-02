@@ -28,12 +28,13 @@ import {
 import { useAccounts } from "@/hooks/use-accounts";
 import { useAuth } from "@/hooks/use-auth";
 import { useCategories } from "@/hooks/use-categories";
+import { useDebts } from "@/hooks/use-debts";
+import { formatCurrency } from "@/lib/format";
 import {
   incomeExpenseSchema,
   type IncomeExpenseInput,
 } from "@/lib/validations/transactions";
 import { createIncomeOrExpense } from "@/services/transactionService";
-
 function todayInputValue() {
   const now = new Date();
   const offset = now.getTimezoneOffset();
@@ -52,9 +53,13 @@ export function IncomeExpenseForm({
   const { categories } = useCategories();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
+  const { debts } = useDebts();
+
   const relevantCategories = categories.filter(
     (c) => c.kind === type || c.kind === "both"
   );
+
+  const availableDebts = debts.filter((debt) => debt.isActive);
 
   const form = useForm<
     z.input<typeof incomeExpenseSchema>,
@@ -68,6 +73,7 @@ export function IncomeExpenseForm({
       date: todayInputValue(),
       accountId: "",
       categoryId: "",
+      debtId: undefined,
     },
   });
 
@@ -198,6 +204,38 @@ export function IncomeExpenseForm({
             </FormItem>
           )}
         />
+        {type === "expense" && (
+          <FormField
+            control={form.control}
+            name="debtId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Deuda pagada (opcional)</FormLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecciona una deuda" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="">Ninguna deuda</SelectItem>
+                    {availableDebts.map((debt) => (
+                      <SelectItem key={debt.id} value={debt.id}>
+                        {debt.name} · {formatCurrency(debt.monthlyPayment)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {availableDebts.length === 0 && (
+                  <p className="text-muted-foreground text-xs">
+                    No hay deudas activas para asociar al pago.
+                  </p>
+                )}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
         <DialogFooter>
           <Button type="submit" disabled={isSubmitting || accounts.length === 0}>
             {isSubmitting && <Loader2 className="animate-spin" />}
