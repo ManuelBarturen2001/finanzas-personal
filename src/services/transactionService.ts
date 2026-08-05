@@ -113,11 +113,18 @@ export async function createTransfer(
 
     const fromBalance = fromSnap.data().currentBalance as number;
     const toBalance = toSnap.data().currentBalance as number;
+    const receivedAmount = input.receivedAmount ?? input.amount;
+    const exchangeRate =
+      input.receivedAmount && input.amount > 0
+        ? input.amount / input.receivedAmount
+        : undefined;
 
     tx.set(transactionRef, {
       userId,
       type: "transfer",
       amount: input.amount,
+      receivedAmount,
+      exchangeRate,
       description: input.description,
       date: toTimestamp(input.date),
       fromAccountId: input.fromAccountId,
@@ -131,7 +138,7 @@ export async function createTransfer(
       updatedAt: serverTimestamp(),
     });
     tx.update(toRef, {
-      currentBalance: toBalance + input.amount,
+      currentBalance: toBalance + receivedAmount,
       updatedAt: serverTimestamp(),
     });
   });

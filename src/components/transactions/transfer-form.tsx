@@ -49,12 +49,20 @@ export function TransferForm({ onSuccess }: { onSuccess: () => void }) {
     resolver: zodResolver(transferSchema),
     defaultValues: {
       amount: 0,
+      receivedAmount: undefined,
       description: "Transferencia entre cuentas",
       date: todayInputValue(),
       fromAccountId: "",
       toAccountId: "",
     },
   });
+
+  const fromAccount = accounts.find(
+    (account) => account.id === form.watch("fromAccountId")
+  );
+  const toAccount = accounts.find(
+    (account) => account.id === form.watch("toAccountId")
+  );
 
   async function onSubmit(values: TransferInput) {
     if (!user) return;
@@ -136,7 +144,9 @@ export function TransferForm({ onSuccess }: { onSuccess: () => void }) {
             name="amount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Monto (S/)</FormLabel>
+                <FormLabel>
+                  Monto origen{fromAccount ? ` (${fromAccount.currency})` : ""}
+                </FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -164,6 +174,32 @@ export function TransferForm({ onSuccess }: { onSuccess: () => void }) {
             )}
           />
         </div>
+        <FormField
+          control={form.control}
+          name="receivedAmount"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Monto destino{toAccount ? ` (${toAccount.currency})` : ""}
+              </FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  {...field}
+                  value={field.value ?? ""}
+                />
+              </FormControl>
+              <FormMessage />
+              <p className="text-muted-foreground text-xs">
+                Si transfieres entre monedas distintas, escribe cuánto llegará a la
+                cuenta destino. Si se trata de la misma moneda, puedes dejarlo en
+                blanco y el mismo monto se aplicará.
+              </p>
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="description"

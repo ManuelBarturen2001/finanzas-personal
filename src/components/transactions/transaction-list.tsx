@@ -110,56 +110,74 @@ export function TransactionList({ transactions }: { transactions: Transaction[] 
   return (
     <>
       <div className="flex flex-col divide-y rounded-lg border">
-        {transactions.map((tx) => (
-          <div key={tx.id} className="flex items-center gap-3 p-3">
-            <TransactionIcon type={tx.type} />
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-medium leading-none">{tx.description}</p>
-              <p className="text-muted-foreground mt-1 truncate text-xs">
-                {tx.type === "transfer" ? (
-                  `${accountName(tx.fromAccountId)} → ${accountName(tx.toAccountId)}`
-                ) : (
-                  `${categoryName(tx.categoryId)}${tx.debtId ? ` · Deuda: ${debtName(tx.debtId)}` : ""} · ${accountName(tx.accountId)}`
-                )}
-                {" · "}
-                {formatDate(toJsDate(tx.date))}
+        {transactions.map((tx) => {
+          const isTransfer = tx.type === "transfer";
+          const fromAccount = isTransfer
+            ? accounts.find((a) => a.id === tx.fromAccountId)
+            : undefined;
+          const toAccount = isTransfer
+            ? accounts.find((a) => a.id === tx.toAccountId)
+            : undefined;
+          const transferLabel =
+            isTransfer
+              ? tx.receivedAmount != null && tx.receivedAmount !== tx.amount
+                ? `${formatCurrency(tx.amount, fromAccount?.currency ?? "PEN")} → ${formatCurrency(
+                    tx.receivedAmount,
+                    toAccount?.currency ?? "PEN"
+                  )}`
+                : formatCurrency(tx.amount, fromAccount?.currency ?? "PEN")
+              : `${tx.type === "expense" ? "-" : "+"}${formatCurrency(tx.amount)}`;
+
+          return (
+            <div key={tx.id} className="flex items-center gap-3 p-3">
+              <TransactionIcon type={tx.type} />
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium leading-none">{tx.description}</p>
+                <p className="text-muted-foreground mt-1 truncate text-xs">
+                  {isTransfer ? (
+                    `${accountName(tx.fromAccountId)} → ${accountName(tx.toAccountId)}`
+                  ) : (
+                    `${categoryName(tx.categoryId)}${tx.debtId ? ` · Deuda: ${debtName(tx.debtId)}` : ""} · ${accountName(tx.accountId)}`
+                  )}
+                  {" · "}
+                  {formatDate(toJsDate(tx.date))}
+                </p>
+              </div>
+              <p
+                className={
+                  "shrink-0 font-medium tabular-nums " +
+                  (tx.type === "income"
+                    ? "text-success"
+                    : tx.type === "expense"
+                      ? "text-destructive"
+                      : "text-foreground")
+                }
+              >
+                {transferLabel}
               </p>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" aria-label="Opciones">
+                    <MoreVertical className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setEditing(tx)}>
+                    <Pencil />
+                    Editar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => setDeleting(tx)}
+                  >
+                    <Trash2 />
+                    Eliminar
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
-            <p
-              className={
-                "shrink-0 font-medium tabular-nums " +
-                (tx.type === "income"
-                  ? "text-success"
-                  : tx.type === "expense"
-                    ? "text-destructive"
-                    : "text-foreground")
-              }
-            >
-              {tx.type === "expense" ? "-" : tx.type === "income" ? "+" : ""}
-              {formatCurrency(tx.amount)}
-            </p>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Opciones">
-                  <MoreVertical className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setEditing(tx)}>
-                  <Pencil />
-                  Editar
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  variant="destructive"
-                  onClick={() => setDeleting(tx)}
-                >
-                  <Trash2 />
-                  Eliminar
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <EditTransactionDialog

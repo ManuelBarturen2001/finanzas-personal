@@ -34,6 +34,15 @@ export const transferSchema = z
     ...baseFields,
     fromAccountId: z.string().min(1, "Selecciona la cuenta de origen"),
     toAccountId: z.string().min(1, "Selecciona la cuenta de destino"),
+    receivedAmount: z.preprocess(
+      (value) => {
+        if (value === "" || value === undefined || value === null) {
+          return undefined;
+        }
+        return Number(value);
+      },
+      z.number().positive("El monto recibido debe ser mayor a 0").optional()
+    ),
   })
   .refine((data) => data.fromAccountId !== data.toAccountId, {
     message: "La cuenta de origen y destino no pueden ser la misma",

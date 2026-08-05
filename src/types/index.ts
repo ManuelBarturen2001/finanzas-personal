@@ -98,6 +98,8 @@ export interface TransferTransaction extends TransactionBase {
   type: "transfer";
   fromAccountId: string;
   toAccountId: string;
+  receivedAmount?: number;
+  exchangeRate?: number;
   /** Las transferencias no llevan categoría: no son ingreso ni gasto. */
   categoryId?: never;
 }
