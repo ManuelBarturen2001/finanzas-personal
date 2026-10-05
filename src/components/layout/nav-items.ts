@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Landmark,
   Repeat,
+  Tag,
   Wallet,
 } from "lucide-react";
 
@@ -21,6 +22,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Cuentas", href: "/accounts", icon: Landmark },
   { label: "Movimientos", href: "/transactions", icon: ArrowLeftRight },
+  { label: "Categorías", href: "/categories", icon: Tag },
   {
     label: "Gastos recurrentes",
     href: "/recurring-expenses",

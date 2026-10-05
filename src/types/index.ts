@@ -176,13 +176,16 @@ export interface Debt {
 
 // ─── Presupuestos (arquitectura preparada, UI en fase posterior) ────────
 
+export type BudgetFrequency = "monthly" | "yearly";
+
 export interface Budget {
   id: string;
   userId: string;
   categoryId: string;
   amount: number;
-  /** Formato "YYYY-MM" para poder hacer queries directas por mes. */
-  month: string;
+  frequency: BudgetFrequency;
+  /** Formato "YYYY-MM" para presupuestos mensuales o "YYYY" para presupuestos anuales. */
+  period: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }

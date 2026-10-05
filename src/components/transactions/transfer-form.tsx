@@ -188,7 +188,7 @@ export function TransferForm({ onSuccess }: { onSuccess: () => void }) {
                   step="0.01"
                   min="0"
                   {...field}
-                  value={field.value ?? ""}
+                  value={field.value as string | number | undefined}
                 />
               </FormControl>
               <FormMessage />

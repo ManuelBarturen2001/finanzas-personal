@@ -22,6 +22,17 @@ export async function createCategory(
   return docRef.id;
 }
 
+export async function updateCategory(
+  categoryId: string,
+  input: { name: string; kind: CategoryKind }
+): Promise<void> {
+  await updateDoc(doc(db, CATEGORIES_COLLECTION, categoryId), {
+    name: input.name,
+    kind: input.kind,
+    updatedAt: serverTimestamp(),
+  });
+}
+
 /**
  * Soft delete: igual que las cuentas, las categorías no se borran
  * físicamente si ya tienen movimientos asociados (y no podemos saberlo
